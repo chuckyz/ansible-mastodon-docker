@@ -1,0 +1,28 @@
+---
+- name: Create persistent directory for postgres
+  file:
+    state: directory
+    path: "{{ postgres_data_path }}"
+    # postgres container UID:GID
+    owner: 70
+    group: 70
+  when: postgres_data_path is defined
+
+- name: Create persistent directory for redis
+  file:
+    state: directory
+    path: "{{ redis_data_path }}"
+  when: redis_data_path is defined
+
+- name: Create directory for mastodon
+  file:
+    state: directory
+    path: "{{ mastodon_path }}"
+  when: mastodon_path is defined
+
+- name: Check necessary vars
+  fail:
+    msg: "{{ item }} is not defined"
+  when: item is not defined
+  loop:
+    - mastodon_domain

@@ -1,0 +1,73 @@
+version: '3'
+services:
+
+  db:
+    restart: always
+    image: postgres:10-alpine
+    networks:
+      - internal_network
+    environment:
+      POSTGRES_PASSWORD: {{ pgpass_uuid.stdout }}
+{% if postgres_data_path is defined %}
+    volumes:
+      - {{postgres_data_path}}:/var/lib/postgresql/data
+{% endif %}
+
+  redis:
+    restart: always
+    image: redis:4.0-alpine
+    networks:
+      - internal_network
+{% if redis_data_path is defined %}
+    volumes:
+      - {{redis_data_path}}:/data
+{% endif %}
+
+  web:
+    image: tootsuite/mastodon:{{mastodon_version}}
+    restart: always
+    env_file: .env.production
+    command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000 -b '0.0.0.0'"
+    networks:
+      - external_network
+      - internal_network
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - {{mastodon_path}}:/mastodon/public/system
+
+  streaming:
+    image: tootsuite/mastodon:{{mastodon_version}}
+    restart: always
+    env_file: .env.production
+    command: yarn start
+    networks:
+      - external_network
+      - internal_network
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      - db
+      - redis
+
+  sidekiq:
+    image: tootsuite/mastodon:{{mastodon_version}}
+    restart: always
+    env_file: .env.production
+    command: bundle exec sidekiq -q default -q push -q mailers -q pull
+    depends_on:
+      - db
+      - redis
+    networks:
+      - external_network
+      - internal_network
+    volumes:
+      - {{mastodon_path}}:/mastodon/public/system
+
+networks:
+  external_network:
+  internal_network:
+    internal: true

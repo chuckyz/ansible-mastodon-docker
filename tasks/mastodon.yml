@@ -1,0 +1,58 @@
+---
+- name: Clone mastodon repo if not cloned
+  git: 
+    repo: "https://github.com/tootsuite/mastodon.git"
+    dest: "{{ mastodon_path }}"
+    update: no
+
+- name: Check for existing .env.production
+  stat:
+    path: "{{ mastodon_path }}/.env.production"
+  register: envfile
+
+- block: 
+  - name: Generate pgsql password
+    shell: uuidgen
+    register: pgpass_uuid
+    when: envfile.stat.exists == False 
+   
+  - name: Setup docker-compose file
+    template:
+      src: docker-compose.yml.j2
+      dest: "{{ mastodon_path }}/docker-compose.yml"
+
+  - name: Setup .env.production to prepare for keys
+    template:
+      src: .env.production.j2
+      dest: "{{ mastodon_path }}/.env.production"
+  
+  - name: Generate rake keys
+    shell: docker-compose run --rm web rake secret
+    args:
+      chdir: "{{ mastodon_path }}"
+    register: rake_keys
+  
+  - name: Generate VAPID keys
+    shell: docker-compose run --rm web rake mastodon:webpush:generate_vapid_key
+    args:
+      chdir: "{{ mastodon_path }}"
+    register: vapid_keys
+
+  - debug:
+      var: "{{ item }}"
+    loop:
+      - rake_keys
+      - vapid_keys
+  
+  # - name: Set keys
+  #   set_fact:
+  #     secret_key_base:  "{{  }}"
+  #     otp_secret: "{{  }}"
+  #     vapid_private_key: "{{  }}"
+  #     vapid_public_key:  "{{  }}"
+  
+  # - name: Setup .env.production
+  #   template:
+  #     src: .env.production.j2
+  #     dest: "{{ mastodon_path }}/.env.production"
+  when: envfile.stat.exists == False

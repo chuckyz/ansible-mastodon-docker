@@ -12,6 +12,8 @@
   file:
     state: directory
     path: "{{ redis_data_path }}"
+    owner: 100
+    group: 100
   when: redis_data_path is defined
 
 - name: Create directory for mastodon

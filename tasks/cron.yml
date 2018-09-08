@@ -1,0 +1,12 @@
+---
+- name: Setup backup script
+  template:
+    src: backup.sh.j2
+    dest: /root/backup.sh
+    mode: 0700
+    
+- name: Setup backup cron
+  cron:
+
+- name: Setup certbot auto-renew
+  cron:

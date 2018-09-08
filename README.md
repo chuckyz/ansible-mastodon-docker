@@ -9,11 +9,15 @@ Requirements
 - docker
 - docker-compose
 - git
+- letsencrypt (certbot)
+- At least 4GB memory (can include swap) for compiling assets
 
 Role Variables
 --------------
 
 mastodon_domain: Your domain.  *Required*
+
+letsencrypt_email: Your email for letsencrypt certificates. *Required*
 
 mastodon_version: Defaults to v2.5.0, see https://hub.docker.com/r/tootsuite/mastodon/tags/ for versions.
 

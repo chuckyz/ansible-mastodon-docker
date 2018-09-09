@@ -5,6 +5,10 @@
     dest: "{{ mastodon_path }}"
     update: no
 
+# Not using file module because recursive chown with it is slow
+- name: Chown everything to mastodon
+  shell: "chown -R mastodon:mastodon {{ mastodon_path }}"
+
 - name: Check for existing .env.production
   stat:
     path: "{{ mastodon_path }}/.env.production"
@@ -20,11 +24,15 @@
     template:
       src: docker-compose.yml.j2
       dest: "{{ mastodon_path }}/docker-compose.yml"
+      owner: mastodon
+      group: mastodon
 
   - name: Setup partial .env.production to prepare for keys
     template:
       src: .env.production.j2
       dest: "{{ mastodon_path }}/.env.production"
+      owner: mastodon
+      group: mastodon
   
   - name: Generate secret key
     shell: docker-compose run --rm web rake secret
@@ -47,6 +55,8 @@
     template:
       src: .env.production.j2
       dest: "{{ mastodon_path }}/.env.production"
+      owner: mastodon
+      group: mastodon
   
   - name: Generate VAPID keys
     shell: docker-compose run --rm web rake mastodon:webpush:generate_vapid_key
@@ -63,9 +73,17 @@
     template:
       src: .env.production.j2
       dest: "{{ mastodon_path }}/.env.production"
+      owner: mastodon
+      group: mastodon
 
   - name: Do initial DB setup after .env.production is setup
     shell: docker-compose run --rm -e SAFETY_ASSURED=1 web rake db:setup
+    args:
+      chdir: "{{ mastodon_path }}"
+
+  # Assets precompile does not seem to generate everything unless this is run first, confusingly.
+  - name: Generate static pages
+    shell: docker-compose run --rm web rake assets:generate_static_pages
     args:
       chdir: "{{ mastodon_path }}"
 
@@ -76,5 +94,6 @@
   when: envfile.stat.exists == False
 
 - name: Start mastodon
-  docker_service:
-    project_src: "{{ mastodon_path }}"
+  shell: docker-compose up -d
+  args:
+    chdir: "{{ mastodon_path }}"

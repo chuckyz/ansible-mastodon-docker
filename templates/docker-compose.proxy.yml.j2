@@ -1,0 +1,14 @@
+version: '3'
+services:
+
+  proxy:
+    restart: always
+    network_mode: host
+    ports:
+      - 443:443
+      - 80:80
+    image: nginx
+    volumes:
+      - /etc/nginx/conf.d/mastodon.conf:/etc/nginx/conf.d/mastodon.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - "{{ mastodon_path }}/public:{{ mastodon_path }}/public:ro"

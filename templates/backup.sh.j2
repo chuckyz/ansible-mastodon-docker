@@ -1,2 +1,5 @@
----
-- hosts: localhost
+#!/bin/bash
+DATE=$(date +%F)
+mkdir -p /backups/$DATE
+tar cvzf mastodon.tar.gz {{ mastodon_path }} >> /backups/$DATE/mastodon-backup.log
+docker exec -it mastodon_db_1 pg_dumpall -c -Upostgres | gzip > /backups/$DATE/pg_dumpall.sql.gz

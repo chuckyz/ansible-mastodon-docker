@@ -4,6 +4,18 @@
     state: directory
     path: /etc/letsencrypt
 
+- name: Test certbot for initial cert
+  shell: |
+    docker run \
+      -v /etc/letsencrypt:/etc/letsencrypt \
+      -p 80:80 \
+      --rm \
+      certbot/certbot \
+      certonly --standalone --test-cert -n --register-unsafely-without-email --agree-tos -d {{ mastodon_domain }}
+  args:
+    creates: /etc/letsencrypt/live/{{ mastodon_domain }}/cert.pem
+  register: test_cert
+
 - name: Run certbot for initial cert
   shell: |
     docker run \
@@ -11,16 +23,25 @@
       -p 80:80 \
       --rm \
       certbot/certbot \
-      certonly --standalone --test-cert --register-unsafely-without-email --agree-tos -d {{ mastodon_domain }}
+      certonly --standalone --force-renewal -n --register-unsafely-without-email --agree-tos -d {{ mastodon_domain }}
+  when: '"Congratulations" in test_cert.stdout'
 
 - name: Setup nginx directory
   file:
     state: directory
-    path: /etc/nginx/conf.d
+    dest: /etc/nginx/conf.d
 
 - name: Setup nginx config
   template:
     src: nginx.conf.j2
-    path: /etc/nginx/conf.d/mastodon.conf
+    dest: /etc/nginx/conf.d/mastodon.conf
 
-- name: Setup nginx docker container
+- name: Setup nginx docker-compose
+  template:
+    src: docker-compose.proxy.yml.j2
+    dest: /etc/nginx/docker-compose.yml
+
+- name: Start nginx container
+  shell: docker-compose up -d
+  args:
+    chdir: "/etc/nginx"

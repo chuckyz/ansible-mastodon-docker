@@ -37,7 +37,8 @@ services:
       - db
       - redis
     volumes:
-      - {{mastodon_path}}:/mastodon/public/system
+      - {{mastodon_path}}/public:/mastodon/public
+      - {{mastodon_path}}/public/system:/mastodon/public/system
 
   streaming:
     image: tootsuite/mastodon:{{mastodon_version}}
@@ -65,7 +66,8 @@ services:
       - external_network
       - internal_network
     volumes:
-      - {{mastodon_path}}:/mastodon/public/system
+      - {{mastodon_path}}/public:/mastodon/public
+      - {{mastodon_path}}/public/system:/mastodon/public/system
 
 networks:
   external_network:

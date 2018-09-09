@@ -30,7 +30,7 @@ server {
   sendfile             on;
   client_max_body_size 80m;
 
-  root /srv/mastodon/live/public;
+  root {{ mastodon_path }}/public;
 
   gzip on;
   gzip_disable "msie6";

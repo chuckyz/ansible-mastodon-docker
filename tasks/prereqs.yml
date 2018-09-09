@@ -1,4 +1,16 @@
 ---
+- name: Create mastodon group
+  group:
+    name: mastodon
+    gid: 991
+
+- name: Create mastodon user
+  user:
+    name: mastodon
+    uid: 991
+    group: mastodon
+    shell: /usr/sbin/nologin
+
 - name: Create persistent directory for postgres
   file:
     state: directory

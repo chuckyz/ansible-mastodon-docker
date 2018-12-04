@@ -5,8 +5,9 @@
     dest: /etc/cron.daily/cert-renew
     mode: 0700
 
-- name: Setup backup cron
-  template:
-    src: backup.sh.j2
-    dest: /etc/cron.daily/backup-mastodon
-    mode: 0700
+# This is bad... for now.
+# - name: Setup backup cron
+#   template:
+#     src: backup.sh.j2
+#     dest: /etc/cron.daily/backup-mastodon
+#     mode: 0700

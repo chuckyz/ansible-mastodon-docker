@@ -2,7 +2,7 @@
 # defaults file for ansible-mastodon
 # postgres_data_path: /var/lib/mastodon/postgres
 # redis_data_path: /var/lib/mastodon/redis
-mastodon_version: "v2.5.0"
+mastodon_version: "v2.6.5"
 mastodon_path: /srv/mastodon
 email:
   server: "127.0.0.1"

@@ -83,18 +83,18 @@ Example Playbook
       become_user: root
       roles:
       - { 
-         	 role: chuckyz.ansible-mastodon-docker, 
+         	 role: "chuckyz.ansible-mastodon-docker", 
          	 mastodon_domain: "mymastodon.tld",
          	 postgres_data_path: "/var/lib/mastodon/postgres",
          	 redis_data_path: "/var/lib/mastodon/redis",
          	 email: {
-              server: "smtp.sparkpostmail.com",
-              port: 587,
-              login: "SMTP_Injection",
-              password: "my_API_key",
-              from_address: "notifications@mymastodon.tld"
-           }  
-		   }
+                   server: "smtp.sparkpostmail.com",
+                   port: 587,
+                   login: "SMTP_Injection",
+                   password: "my_API_key",
+                   from_address: "notifications@mymastodon.tld"
+                 }  
+         }
 
 License
 -------
